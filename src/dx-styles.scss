@@ -60,10 +60,19 @@
     flex-direction: column;
     min-height: 100%;
   }
+  
+}
+
+.dx-toast-content { 
+  color: white;
+  border-radius: 0px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #app {
   height: 100%;
- }
+}
 
 $side-panel-min-width: 60px;

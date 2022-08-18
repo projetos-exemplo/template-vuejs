@@ -1,5 +1,5 @@
 import endpoints from "@/endpoints";
-import api from "./api";
+import { api } from "./api";
 
 export default {  
   loggedIn() {
@@ -34,9 +34,12 @@ export default {
     }
   },
 
-  async logout() {
+  async logout(router) {
     localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    localStorage.removeItem('token'); 
+    router.push({
+      path: "/login", 
+    });
   },
 
   async getUser() {

@@ -87,10 +87,7 @@ export default {
     }];
       
     function onLogoutClick() {
-      auth.logout();
-      router.push({
-        path: "/login", 
-      });
+      auth.logout(router); 
     }
 
     function onProfileClick() {

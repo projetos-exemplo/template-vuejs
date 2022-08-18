@@ -2,45 +2,77 @@
   <div>
     <h2 class="content-block">Clientes</h2>
     <DxDataGrid
-      class="dx-card wide-card"
-      :data-source="clientesStore" 
-      :show-borders="true" 
-      :show-column-lines="true"
-      :column-auto-width="true"
-      :column-hiding-enabled="true"
-      :row-alternation-enabled="true"
-      ref="gridClientes"
+    ref="gridClientes"
+    :data-source="dataSourceClientes"
+    :remote-operations="false"
+    :allow-column-reordering="true"
+    :row-alternation-enabled="true"
+    :show-borders="true" 
     >
-      <DxLoadPanel :enabled="true" />
-      <DxPaging :page-size="10" />
-      <DxPager :show-page-size-selector="true" :show-info="true" />
-      <DxFilterRow :visible="true" />
-      <DxEditing
-        :allow-updating="true"
-        :allow-adding="true"
-        :allow-deleting="true"
-        refresh-mode="reshape"
-        mode="popup"
-      >
-        <DxPopup
-          :show-title="true" 
-          :height="isLargeScreen ? 350 : 'auto'"
-          title="Dados do Cliente"
-        > 
-          <DxToolbarItem
-            toolbar="bottom"
-            location="after"
-            widget="dxButton"
-            :options="saveButtonOptions"
-          />
-          <DxToolbarItem
-            toolbar="bottom"
-            location="after"
-            widget="dxButton"
-            :options="cancelButtonOptions"
-          />
-        </DxPopup>
-        <DxForm>
+      <DxColumn
+        data-field="id"
+        caption="Id"
+        data-type="number"   
+        :visible="false"
+      />
+      <DxColumn
+        data-field="nome"
+        caption="Nome"     
+        :hiding-priority="8"
+      />
+      <DxColumn
+        data-field="cnpj"
+        caption="CNPJ"    
+        :hiding-priority="6"
+      />
+      <DxColumn
+        data-field="schema"
+        caption="Schema"   
+        :width="90" 
+        :hiding-priority="5"
+      />
+      <DxColumn
+        data-field="indAtivo"
+        caption="Ativo"  
+        :width="90" 
+        :hiding-priority="1" 
+        :calculate-cell-value="(rowData) => { 
+          return rowData.indAtivo ? 'Sim' : 'Não'
+        }"
+      /> 
+      <DxColumn 
+        type="buttons"
+        alignment="center"
+        caption="Ações" 
+        :width="110" 
+      > 
+        <DxButton
+          hint="Editar"
+          icon="edit" 
+          @click="exibirPopupEditarCliente"
+        />
+      </DxColumn>
+      <DxColumn
+        data-field="url"
+        caption="url"
+        :visible="false"
+      />
+      <DxColumn
+        data-field="urlLogo"
+        caption="urlLogo"
+        :visible="false"
+      />  
+    </DxDataGrid>
+
+    <DxPopup
+      v-model:visible="exibirPopup"
+      :show-title="true" 
+      :show-close-button="true"
+      :title="tituloPopup"
+      :height="isLargeScreen ? 550 : 'auto'"
+    >
+      <form class="form" @submit.prevent="handleSalvarCliente">
+        <DxForm :form-data="dadosCliente" :disabled="isLoading">
           <DxItem
             :col-count="1"
             :col-span="2"
@@ -95,158 +127,255 @@
               <DxRequiredRule message="Preencha o Schema." />
               <DxLabel :visible="false" />
             </DxItem>
-            <DxItem  
+            <DxItem 
               data-field='indAtivo'
               editor-type='dxSelectBox'   
-              :editor-options="{ 
+              :editor-options="{  
                 stylingMode: 'outlined',  
                 labelMode: 'floating', 
                 placeholder: 'Ativo',
                 dataSource: indicatorAtivo,
                 displayExpr: 'description',
-                valueExpr: 'value',
-                value: false,
+                valueExpr: 'value', 
               }"
-            >    
-              <DxRequiredRule message="Selecione um item." />
-              <DxValidator>
-                <DxCompareRule
-                  :comparison-target="(e) => e.target.value === null"
-                  message="You must agree to the Terms and Conditions"
-                />
-              </DxValidator>
+            >  
+              <DxCompareRule comparison-type="!==" :comparison-target="() => { return undefined}" message="Teste"/>
               <DxLabel :visible="false" />
             </DxItem>
           </DxItem> 
-        </DxForm>
-      </DxEditing>
-
-      <DxColumn data-field="id" :width="90" :hiding-priority="2" />
-
-      <DxColumn
-        data-field="nome"
-        caption="Nome" 
-        :hiding-priority="8"
-      />
-
-      <DxColumn
-        data-field="cnpj"
-        caption="CNPJ"
-        :hiding-priority="6"
-      />
-
-      <DxColumn
-        data-field="schema"
-        caption="Schema"
-        :hiding-priority="5"
-      > 
-      </DxColumn>  
-
-      <DxColumn
-        data-field="indAtivo"
-        caption="Ativo" 
-        :hiding-priority="1"
-      /> 
-    </DxDataGrid> 
+          <DxItem
+            :col-count="1"
+            :col-span="2"
+            item-type="group"
+          >
+            <DxItem 
+              data-field="url"
+              editor-type='dxTextBox'
+              :editor-options="{ 
+                stylingMode: 'outlined', 
+                labelMode: 'floating', 
+                placeholder: 'URL'
+              }"
+            > 
+              <DxRequiredRule message="Preencha a Url." />
+              <DxLabel :visible="false" />
+            </DxItem>
+          </DxItem> 
+          <DxItem
+            :col-count="1"
+            :col-span="2"
+            item-type="group"
+          >
+            <DxItem 
+              data-field="urlLogo"
+              editor-type='dxTextBox'
+              :editor-options="{ 
+                stylingMode: 'outlined', 
+                labelMode: 'floating', 
+                placeholder: 'URL Logo'
+              }"
+            > 
+              <DxRequiredRule message="Preencha o URL da Logo." />
+              <DxLabel :visible="false" />
+            </DxItem>
+          </DxItem>
+          <DxItem
+            :col-count="2"
+            :col-span="2"
+            item-type="group"
+          >
+            <DxButtonItem>
+              <DxButtonOptions
+                width="100%"
+                type="default"
+                template="btnSalvarTemplate"
+                :use-submit-behavior="true"
+              >
+              </DxButtonOptions>
+            </DxButtonItem>
+            <DxButtonItem>
+              <DxButtonOptions
+                width="100%"
+                type="default"
+                template="btnCancelarTemplate"
+                @click="handleCancelar"
+              >
+              </DxButtonOptions>
+            </DxButtonItem>
+          </DxItem> 
+          <template #btnSalvarTemplate>
+            <div>
+              <span class="dx-button-text">
+                <DxLoadIndicator v-if="isLoading" width="24px" height="24px" :visible="true" />
+                <span v-if="!isLoading">Salvar</span>
+              </span>
+            </div>
+          </template>
+          <template #btnCancelarTemplate>
+            <div>
+              <span class="dx-button-text"> 
+                <span>Cancelar</span>
+              </span>
+            </div>
+          </template>
+        </DxForm> 
+      </form>
+    </DxPopup>
   </div> 
 </template>
 
-<script>
+<script>  
 import { ref } from 'vue';  
+import { useRouter } from 'vue-router';
+import { api, validateApiError }  from '@/services/api';
+import endpoints from '@/endpoints';  
 import { sizes } from '../utils/media-query';
-import CustomStore from 'devextreme/data/custom_store';
-import "devextreme/data/odata/store";
-import DxDataGrid, {
+import customNotify from '@/utils/custom-notify'; 
+
+import DxDataGrid, { 
   DxColumn,
-  DxFilterRow, 
-  DxEditing,
-  DxPopup, 
-  DxToolbarItem,
-  DxForm,
-  DxItem,
-  DxPager,
-  DxPaging,
-  DxLoadPanel,
+  DxButton
+} from 'devextreme-vue/data-grid';
+
+import { DxPopup } from 'devextreme-vue/popup';
+import DxForm, {
+  DxItem,  
+  DxLabel, 
   DxRequiredRule,
-  DxLabel,
-} from "devextreme-vue/data-grid";
-import api from '@/services/api';
-import endpoints from '@/endpoints';
+  DxCompareRule,
+  DxButtonItem,
+  DxButtonOptions
+} from "devextreme-vue/form";
+
+import DxLoadIndicator from "devextreme-vue/load-indicator";
 
 const indicatorAtivo = [
   {
-    value: true,
+    value: true, 
     description: 'Sim'
   },
   {
     value: false,
     description: 'Não'
   },
-];
+]; 
 
 export default { 
-  setup() {
-    const isLargeScreen = sizes()['screen-large'];
-
+  setup() {  
+    const router = useRouter(); 
+    const token = localStorage.getItem('token');  
+    const isLargeScreen = sizes()['screen-large']; 
+    const isLoading = ref(false);
+    
     const gridClientes = ref(null); 
-    const token = localStorage.getItem('token'); 
+    const dataSourceClientes = ref([]); 
+    
+    const exibirPopup = ref(null);
+    const tituloPopup = ref(null);
+    const dadosCliente = ref(null);
 
-    const clientesStore = new CustomStore({
-      key: 'id',
-      load: () => buscarClientes(),
-      insert: (values) => console.log(values),
-      update: (key, values) => console.log(key,values),
-      remove: (key) => console.log(key),
-    }); 
-
-    const saveButtonOptions = {
-      text: "Salvar",
-      icon: "save", 
-      stylingMode: "contained",
-      onClick: () => {   
-        gridClientes.value.instance.saveEditData();
+    const buscarClientes = async () => {  
+      try { 
+        const response = await api.get(endpoints.CLIENTES, {
+          headers: { Authorization: `Bearer ${token}` }
+        }); 
+        dataSourceClientes.value = response.data;
+      } catch (err) {
+        validateApiError(err, router); 
       }
-    };
+    }  
 
-    const cancelButtonOptions = {
-      text: "Cancelar", 
-      stylingMode: "contained",
-      onClick: e => {
-        console.log(e); 
-        gridClientes.value.instance.cancelEditData();
+    buscarClientes();
+
+    const exibirPopupEditarCliente = (e) => {
+      exibirPopup.value = true;
+      tituloPopup.value = 'Editar Cliente';
+      dadosCliente.value = e.row.data; 
+    }
+
+    // const saveButtonOptions = {
+    //   text: "Salvar",
+    //   icon: "save", 
+    //   stylingMode: "contained",
+    //   onClick: () => {     
+    //     dadosCliente.value.id ? atualizarCliente() : cadastrarCliente(); 
+    //   }
+    // };
+    
+    // const cancelButtonOptions = {
+    //   text: "Cancelar", 
+    //   stylingMode: "contained",
+    //   onClick: () => { 
+    //     exibirPopup.value = false;
+    //   }
+    // };
+
+    const handleSalvarCliente = () => {
+      dadosCliente.value.id ? atualizarCliente() : cadastrarCliente(); 
+    } 
+
+    const handleCancelar = () => {
+      exibirPopup.value = false;
+    }
+
+    const cadastrarCliente = async () => { 
+      const data = dadosCliente.value;
+      try { 
+        const response = await api.post(endpoints.CLIENTES, data, {
+          headers: { Authorization: `Bearer ${token}` }
+        }); 
+        customNotify(response.data.message, "success"); 
+      } catch (err) {  
+        validateApiError(err, router);
+      } finally {
+        exibirPopup.value = false;
+        buscarClientes();
       }
-    };
+    }
 
-    const buscarClientes = async () => {
-      const response = await api.get(endpoints.BUSCAR_CLIENTES, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      return response.data;
-    }       
-    return { 
+    const atualizarCliente = async () => {
+      const data = dadosCliente.value;
+      try { 
+        const response = await api.put(endpoints.CLIENTES, data, {
+          headers: { Authorization: `Bearer ${token}` }
+        }); 
+        customNotify(response.data.message, "success");  
+      } catch (err) { 
+        validateApiError(err, router);
+      } finally {
+        exibirPopup.value = false;
+        buscarClientes();
+      }
+    }
+
+    return {
       isLargeScreen,
+      isLoading,
       gridClientes,
-      clientesStore,
-      saveButtonOptions,
-      cancelButtonOptions,
+      dataSourceClientes,
+      exibirPopup,
+      tituloPopup,
+      dadosCliente,
+      exibirPopupEditarCliente,
       indicatorAtivo,
+      handleSalvarCliente,
+      handleCancelar
     };
   },   
-  components: {
+  components: { 
     DxDataGrid,
     DxColumn,
-    DxFilterRow,
-    DxEditing, 
+    DxButton,
     DxPopup, 
-    DxToolbarItem,
     DxForm,
     DxItem,
-    DxPager,
-    DxPaging,
-    DxLoadPanel,
+    DxLabel,
     DxRequiredRule,
-    DxLabel
+    DxCompareRule,
+    DxButtonItem,
+    DxButtonOptions,
+    DxLoadIndicator
   }
 };
+
 </script>
