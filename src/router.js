@@ -1,9 +1,11 @@
-import auth from "./auth";
-import { createRouter, createWebHashHistory } from "vue-router";
+import auth from "./services/auth";
+import { createRouter, createWebHistory } from "vue-router";
+
+import Login from "./views/login-page";
 
 import Home from "./views/home-page";
 import Profile from "./views/profile-page";
-import Tasks from "./views/tasks-page";
+import Clientes from "./views/clientes-page";
 import defaultLayout from "./layouts/side-nav-outer-toolbar";
 import simpleLayout from "./layouts/single-card";
 
@@ -32,23 +34,22 @@ const router = new createRouter({
       component: Profile
     },
     {
-      path: "/tasks",
-      name: "tasks",
+      path: "/clientes",
+      name: "clientes",
       meta: {
         requiresAuth: true,
         layout: defaultLayout
       },
-      component: Tasks
+      component: Clientes
     },
     {
-      path: "/login-form",
-      name: "login-form",
+      path: "/login",
+      name: "login",
       meta: {
         requiresAuth: false,
         layout: simpleLayout,
-        title: "Sign In"
       },
-      component: loadView("login-form")
+      component: Login
     },
     {
       path: "/reset-password",
@@ -94,21 +95,17 @@ const router = new createRouter({
       redirect: "/home"
     }
   ],
-  history: createWebHashHistory()
+  history: createWebHistory()
 });
 
 router.beforeEach((to, from, next) => {
-
-  if (to.name === "login-form" && auth.loggedIn()) {
+  if (to.name === "login" && auth.loggedIn()) {
     next({ name: "home" });
   }
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!auth.loggedIn()) {
-      next({
-        name: "login-form",
-        query: { redirect: to.fullPath }
-      });
+    if (!auth.loggedIn()) { 
+      next({ name: "login" });
     } else {
       next();
     }

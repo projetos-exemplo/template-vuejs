@@ -1,44 +1,50 @@
-const defaultUser = {
-  email: 'sandra@example.com',
-  avatarUrl: 'https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/employees/06.png'
-};
+import endpoints from "@/endpoints";
+import api from "./api";
 
-export default {
-  _user: defaultUser,
+export default {  
   loggedIn() {
-    return !!this._user;
+    const user = JSON.parse(localStorage.getItem('user'));
+    return !!user;
   },
 
-  async logIn(email, password) {
+  async login(email, senha) {
     try {
-      // Send request
-      console.log(email, password);
-      this._user = { ...defaultUser, email };
-
+      const data = {
+        "userName": email,
+        "password": senha,
+        "client": "avmb",
+        "portal": "super_admin"
+      }
+      const result = await api.post(endpoints.LOGIN, data); 
+      const token = result.data.token;
+      localStorage.setItem('token', token); 
+      const userData = window.atob(token.split('.')[1])
+      localStorage.setItem('user', JSON.stringify(userData));
+      
       return {
-        isOk: true,
-        data: this._user
+        isOk: true
       };
     }
-    catch {
+    catch (err) {
+      console.log(err)
       return {
         isOk: false,
-        message: "Authentication failed"
+        message: err.response.data.Message
       };
     }
   },
 
-  async logOut() {
-    this._user = null;
+  async logout() {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   },
 
   async getUser() {
     try {
-      // Send request
-
+      const user = JSON.parse(localStorage.getItem('user'));
       return {
         isOk: true,
-        data: this._user
+        data: user
       };
     }
     catch {

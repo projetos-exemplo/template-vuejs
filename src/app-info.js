@@ -1,3 +1,3 @@
 export default {
-  title: "Avmb.academico.ppg.webui.whitelabel"
+  title: "Portal do Administrador"
 };

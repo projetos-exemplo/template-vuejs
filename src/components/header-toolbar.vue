@@ -56,8 +56,8 @@
 <script>
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-import auth from "../auth";
-import { useRouter, useRoute } from 'vue-router';
+import auth from "../services/auth";
+import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 
 import UserPanel from "./user-panel";
@@ -70,8 +70,7 @@ export default {
     logOutFunc: Function
   },
   setup() {
-    const router = useRouter();
-    const route = useRoute();
+    const router = useRouter(); 
 
     const email = ref("");
     auth.getUser().then((e) => email.value = e.data.email);
@@ -88,17 +87,15 @@ export default {
     }];
       
     function onLogoutClick() {
-      auth.logOut();
+      auth.logout();
       router.push({
-        path: "/login-form",
-        query: { redirect: route.path }
+        path: "/login", 
       });
     }
 
     function onProfileClick() {
       router.push({
-        path: "/profile",
-        query: { redirect: route.path }
+        path: "/profile", 
       });
     }
 
