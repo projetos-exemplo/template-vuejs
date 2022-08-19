@@ -19,7 +19,7 @@ export default {
       const token = result.data.token;
       localStorage.setItem('token', token); 
       const userData = window.atob(token.split('.')[1])
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', userData);
       
       return {
         isOk: true
@@ -44,7 +44,7 @@ export default {
 
   async getUser() {
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
+      const user = JSON.parse(localStorage.getItem('user')); 
       return {
         isOk: true,
         data: user

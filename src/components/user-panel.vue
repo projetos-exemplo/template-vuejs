@@ -1,10 +1,7 @@
 <template>
   <div class="user-panel">
-    <div class="user-info">
-      <div class="image-container">
-        <div class="user-image" />
-      </div>
-      <div class="user-name">{{email}}</div>
+    <div class="user-info"> 
+      <div class="user-name">{{username}}</div>
     </div>
 
     <dx-context-menu
@@ -34,7 +31,7 @@ export default {
   props: {
     menuMode: String,
     menuItems: Array,
-    email: String
+    username: String
   },
   components: {
     DxContextMenu,
@@ -50,34 +47,18 @@ export default {
 .user-info {
   display: flex;
   align-items: center;
+  height: 30px;
 
   .dx-toolbar-menu-section & {
     padding: 10px 6px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  }
-
-  .image-container {
-    overflow: hidden;
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-    margin: 0 4px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-
-    .user-image {
-      width: 100%;
-      height: 100%;
-      background: url("https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/employees/06.png")
-        no-repeat #fff;
-      background-size: cover;
-    }
-  }
+  } 
 
   .user-name {
     font-size: 14px;
     color: $base-text-color;
-    margin: 0 9px;
+    margin: 0 9px 10px;
+    font-weight: 600;
   }
 }
 

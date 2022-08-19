@@ -36,7 +36,7 @@
               height="100%"
               styling-mode="text"
             >
-              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
+              <user-panel :username="username" :menu-items="userMenuItems" menu-mode="context" />
             </dx-button>
           </div>
         </template>
@@ -44,7 +44,7 @@
       
       <template #menuUserItem>
         <user-panel
-          :email="email"
+          :username="username"
           :menu-items="userMenuItems"
           menu-mode="list"
         />
@@ -72,32 +72,24 @@ export default {
   setup() {
     const router = useRouter(); 
 
-    const email = ref("");
-    auth.getUser().then((e) => email.value = e.data.email);
+    const username = ref("");
+    auth.getUser().then((e) => { 
+      username.value = e.data.Username
+    });
     
-    const userMenuItems = [{
-        text: "Profile",
-        icon: "user",
-        onClick: onProfileClick
-      },
+    const userMenuItems = [
       {
-        text: "Logout",
+        text: "Sair",
         icon: "runner",
         onClick: onLogoutClick
     }];
       
     function onLogoutClick() {
       auth.logout(router); 
-    }
-
-    function onProfileClick() {
-      router.push({
-        path: "/profile", 
-      });
-    }
+    } 
 
     return {
-      email,
+      username,
       userMenuItems
     };
   },

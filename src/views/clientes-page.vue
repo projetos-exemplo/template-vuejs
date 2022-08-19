@@ -9,6 +9,13 @@
     :row-alternation-enabled="true"
     :show-borders="true" 
     >
+      <DxToolbar> 
+        <DxItem 
+          location="after"
+          widget="dxButton"
+          :options="addButtonOptions"
+        />
+      </DxToolbar>
       <DxColumn
         data-field="id"
         caption="Id"
@@ -71,155 +78,127 @@
       :title="tituloPopup"
       :height="isLargeScreen ? 550 : 'auto'"
     >
-      <form class="form" @submit.prevent="handleSalvarCliente">
-        <DxForm :form-data="dadosCliente" :disabled="isLoading">
-          <DxItem
-            :col-count="1"
-            :col-span="2"
-            item-type="group"
-          >
-            <DxItem 
-              data-field="nome"
-              editor-type='dxTextBox'
-              :editor-options="{ 
-                stylingMode: 'outlined', 
-                labelMode: 'floating', 
-                placeholder: 'Nome'
-              }"
-            > 
-              <DxRequiredRule message="Preencha o Nome." />
-              <DxLabel :visible="false" />
-            </DxItem>
-          </DxItem>  
-          <DxItem
-            :col-count="1"
-            :col-span="2"
-            item-type="group"
+      <DxForm ref="formCliente" :form-data="dadosCliente" :disabled="isLoading">
+        <DxItem
+          :col-count="1"
+          :col-span="2"
+          item-type="group"
+        >
+          <DxItem 
+            data-field="nome"
+            editor-type='dxTextBox'
+            :editor-options="{ 
+              stylingMode: 'outlined', 
+              labelMode: 'floating', 
+              placeholder: 'Nome'
+            }"
           > 
-            <DxItem 
-              data-field="cnpj" 
-              editor-type='dxTextBox'
-              :editor-options="{ 
-                stylingMode: 'outlined', 
-                labelMode: 'floating', 
-                placeholder: 'CNPJ',
-                mask: '00.000.000/0000-00'
-              }"
-            >
-              <DxRequiredRule message="Preencha o CNPJ." />
-              <DxLabel :visible="false" />
-            </DxItem>
+            <DxRequiredRule message="Preencha o Nome." />
+            <DxLabel :visible="false" />
           </DxItem>
-          <DxItem
-            :col-count="2"
-            :col-span="2"
-            item-type="group"
+        </DxItem>  
+        <DxItem
+          :col-count="1"
+          :col-span="2"
+          item-type="group"
+        > 
+          <DxItem 
+            data-field="cnpj"
+            editor-type='dxTextBox'
+            :editor-options="{ 
+              stylingMode: 'outlined', 
+              labelMode: 'floating', 
+              placeholder: 'CNPJ',
+              mask: '00.000.000/0000-00',
+              maskInvalidMessage: 'Preencha o CNPJ.'
+            }"
           >
-            <DxItem 
-              data-field='schema'
-              editor-type='dxTextBox'
-              :editor-options="{ 
-                stylingMode: 'outlined', 
-                labelMode: 'floating', 
-                placeholder: 'Schema', 
-              }"
-            >
-              <DxRequiredRule message="Preencha o Schema." />
-              <DxLabel :visible="false" />
-            </DxItem>
-            <DxItem 
-              data-field='indAtivo'
-              editor-type='dxSelectBox'   
-              :editor-options="{  
-                stylingMode: 'outlined',  
-                labelMode: 'floating', 
-                placeholder: 'Ativo',
-                dataSource: indicatorAtivo,
-                displayExpr: 'description',
-                valueExpr: 'value', 
-              }"
-            >  
-              <DxCompareRule comparison-type="!==" :comparison-target="() => { return undefined}" message="Teste"/>
-              <DxLabel :visible="false" />
-            </DxItem>
-          </DxItem> 
-          <DxItem
-            :col-count="1"
-            :col-span="2"
-            item-type="group"
-          >
-            <DxItem 
-              data-field="url"
-              editor-type='dxTextBox'
-              :editor-options="{ 
-                stylingMode: 'outlined', 
-                labelMode: 'floating', 
-                placeholder: 'URL'
-              }"
-            > 
-              <DxRequiredRule message="Preencha a Url." />
-              <DxLabel :visible="false" />
-            </DxItem>
-          </DxItem> 
-          <DxItem
-            :col-count="1"
-            :col-span="2"
-            item-type="group"
-          >
-            <DxItem 
-              data-field="urlLogo"
-              editor-type='dxTextBox'
-              :editor-options="{ 
-                stylingMode: 'outlined', 
-                labelMode: 'floating', 
-                placeholder: 'URL Logo'
-              }"
-            > 
-              <DxRequiredRule message="Preencha o URL da Logo." />
-              <DxLabel :visible="false" />
-            </DxItem>
+            <DxRequiredRule message="Preencha o CNPJ." /> 
+            <DxLabel :visible="false" />
           </DxItem>
-          <DxItem
-            :col-count="2"
-            :col-span="2"
-            item-type="group"
+        </DxItem>
+        <DxItem
+          :col-count="2"
+          :col-span="2"
+          item-type="group"
+        >
+          <DxItem 
+            data-field='schema'
+            editor-type='dxTextBox'
+            :editor-options="{  
+              readOnly: !isNew,
+              stylingMode: 'outlined', 
+              labelMode: 'floating', 
+              placeholder: 'Schema', 
+            }"
           >
-            <DxButtonItem>
-              <DxButtonOptions
-                width="100%"
-                type="default"
-                template="btnSalvarTemplate"
-                :use-submit-behavior="true"
-              >
-              </DxButtonOptions>
-            </DxButtonItem>
-            <DxButtonItem>
-              <DxButtonOptions
-                width="100%"
-                type="default"
-                template="btnCancelarTemplate"
-                @click="handleCancelar"
-              >
-              </DxButtonOptions>
-            </DxButtonItem>
-          </DxItem> 
-          <template #btnSalvarTemplate>
-            <div>
-              <span class="dx-button-text">
-                <DxLoadIndicator v-if="isLoading" width="24px" height="24px" :visible="true" />
-                <span v-if="!isLoading">Salvar</span>
-              </span>
-            </div>
-          </template>
-          <template #btnCancelarTemplate>
-            <div>
-              <span class="dx-button-text"> 
-                <span>Cancelar</span>
-              </span>
-            </div>
-          </template>
-        </DxForm> 
-      </form>
+            <DxRequiredRule message="Preencha o Schema." />
+            <DxLabel :visible="false" />
+          </DxItem>
+          <DxItem 
+            data-field='indAtivo'
+            editor-type='dxSelectBox'   
+            :editor-options="{  
+              stylingMode: 'outlined',  
+              labelMode: 'floating', 
+              placeholder: 'Ativo',
+              dataSource: indicatorAtivo,
+              displayExpr: 'description',
+              valueExpr: 'value', 
+            }"
+          >   
+            <DxLabel :visible="false" />
+          </DxItem>
+        </DxItem> 
+        <DxItem
+          :col-count="1"
+          :col-span="2"
+          item-type="group"
+        >
+          <DxItem 
+            data-field="url"
+            editor-type='dxTextBox'
+            :editor-options="{ 
+              stylingMode: 'outlined', 
+              labelMode: 'floating', 
+              placeholder: 'URL'
+            }"
+          > 
+            <DxRequiredRule message="Preencha a Url." />
+            <DxLabel :visible="false" />
+          </DxItem>
+        </DxItem> 
+        <DxItem
+          :col-count="1"
+          :col-span="2"
+          item-type="group"
+        >
+          <DxItem 
+            data-field="urlLogo"
+            editor-type='dxTextBox'
+            :editor-options="{ 
+              stylingMode: 'outlined', 
+              labelMode: 'floating', 
+              placeholder: 'URL Logo'
+            }"
+          > 
+            <DxRequiredRule message="Preencha o URL da Logo." />
+            <DxLabel :visible="false" />
+          </DxItem>
+        </DxItem>  
+      </DxForm> 
+      <DxToolbarItem
+        toolbar="bottom"
+        location="after"
+        widget="dxButton"
+        :options="saveButtonOptions"
+      />
+      <DxToolbarItem
+        toolbar="bottom"
+        location="after"
+        widget="dxButton"
+        :options="cancelButtonOptions"
+      />
     </DxPopup>
   </div> 
 </template>
@@ -231,23 +210,20 @@ import { api, validateApiError }  from '@/services/api';
 import endpoints from '@/endpoints';  
 import { sizes } from '../utils/media-query';
 import customNotify from '@/utils/custom-notify'; 
+import { validarCNPJ } from '@/utils/validators';
 
 import DxDataGrid, { 
+  DxToolbar,
   DxColumn,
   DxButton
 } from 'devextreme-vue/data-grid';
 
-import { DxPopup } from 'devextreme-vue/popup';
+import { DxPopup, DxToolbarItem } from 'devextreme-vue/popup';
 import DxForm, {
   DxItem,  
   DxLabel, 
-  DxRequiredRule,
-  DxCompareRule,
-  DxButtonItem,
-  DxButtonOptions
-} from "devextreme-vue/form";
-
-import DxLoadIndicator from "devextreme-vue/load-indicator";
+  DxRequiredRule, 
+} from "devextreme-vue/form";  
 
 const indicatorAtivo = [
   {
@@ -272,7 +248,9 @@ export default {
     
     const exibirPopup = ref(null);
     const tituloPopup = ref(null);
+    const formCliente = ref(null);
     const dadosCliente = ref(null);
+    const isNew = ref(null);
 
     const buscarClientes = async () => {  
       try { 
@@ -287,31 +265,49 @@ export default {
 
     buscarClientes();
 
+    const exibirPopupAdicionarCliente = () => {
+      exibirPopup.value = true;
+      tituloPopup.value = 'Novo Cliente';
+      dadosCliente.value = Object.assign({}, {});
+      dadosCliente.value.indAtivo = false;
+      isNew.value = true;
+    }
+
     const exibirPopupEditarCliente = (e) => {
       exibirPopup.value = true;
       tituloPopup.value = 'Editar Cliente';
-      dadosCliente.value = e.row.data; 
-    }
+      dadosCliente.value = Object.assign({}, e.row.data); 
+      isNew.value = false;
+    } 
 
-    // const saveButtonOptions = {
-    //   text: "Salvar",
-    //   icon: "save", 
-    //   stylingMode: "contained",
-    //   onClick: () => {     
-    //     dadosCliente.value.id ? atualizarCliente() : cadastrarCliente(); 
-    //   }
-    // };
+    const addButtonOptions = {
+      hint: "Novo cliente",
+      icon: "plus",   
+      onClick: () => exibirPopupAdicionarCliente()
+    };
+
+    const saveButtonOptions = {
+      text: "Salvar",
+      icon: "save", 
+      type: "default",
+      stylingMode: "contained",
+      onClick: () => handleSalvarCliente()
+    };
     
-    // const cancelButtonOptions = {
-    //   text: "Cancelar", 
-    //   stylingMode: "contained",
-    //   onClick: () => { 
-    //     exibirPopup.value = false;
-    //   }
-    // };
+    const cancelButtonOptions = {
+      text: "Cancelar", 
+      stylingMode: "contained",
+      type: "normal",
+      elementAttr: {
+        class: "dx-button-cancel"
+      },
+      onClick: () => { 
+        exibirPopup.value = false;
+      }
+    };
 
-    const handleSalvarCliente = () => {
-      dadosCliente.value.id ? atualizarCliente() : cadastrarCliente(); 
+    const handleSalvarCliente = () => { 
+      isNew.value ? cadastrarCliente() : atualizarCliente(); 
     } 
 
     const handleCancelar = () => {
@@ -319,33 +315,49 @@ export default {
     }
 
     const cadastrarCliente = async () => { 
-      const data = dadosCliente.value;
-      try { 
-        const response = await api.post(endpoints.CLIENTES, data, {
-          headers: { Authorization: `Bearer ${token}` }
-        }); 
-        customNotify(response.data.message, "success"); 
-      } catch (err) {  
-        validateApiError(err, router);
-      } finally {
-        exibirPopup.value = false;
-        buscarClientes();
+      const formIsValid = formCliente.value.instance.validate().isValid; 
+      if (formIsValid) {
+        const isValidCnpj = validarCNPJ(dadosCliente.value.cnpj); 
+        if (!isValidCnpj) {
+          customNotify("O CNPJ informado é inválido", "warning"); 
+          return;
+        }
+        const data = dadosCliente.value;
+        try { 
+          const response = await api.post(endpoints.CLIENTES, data, {
+            headers: { Authorization: `Bearer ${token}` }
+          }); 
+          customNotify(response.data.message, "success"); 
+        } catch (err) {  
+          validateApiError(err, router);
+        } finally {
+          exibirPopup.value = false;
+          buscarClientes();
+        }
       }
     }
 
     const atualizarCliente = async () => {
-      const data = dadosCliente.value;
-      try { 
-        const response = await api.put(endpoints.CLIENTES, data, {
-          headers: { Authorization: `Bearer ${token}` }
-        }); 
-        customNotify(response.data.message, "success");  
-      } catch (err) { 
-        validateApiError(err, router);
-      } finally {
-        exibirPopup.value = false;
-        buscarClientes();
-      }
+      const formIsValid = formCliente.value.instance.validate().isValid; 
+      if (formIsValid) {
+        const isValidCnpj = validarCNPJ(dadosCliente.value.cnpj); 
+        if (!isValidCnpj) {
+          customNotify("O CNPJ informado é inválido", "warning"); 
+          return;
+        }
+        const data = dadosCliente.value;
+        try { 
+          const response = await api.put(endpoints.CLIENTES, data, {
+            headers: { Authorization: `Bearer ${token}` }
+          }); 
+          customNotify(response.data.message, "success");  
+        } catch (err) { 
+          validateApiError(err, router);
+        } finally {
+          exibirPopup.value = false;
+          buscarClientes();
+        }
+      } 
     }
 
     return {
@@ -355,26 +367,29 @@ export default {
       dataSourceClientes,
       exibirPopup,
       tituloPopup,
+      formCliente,
       dadosCliente,
-      exibirPopupEditarCliente,
+      isNew,
+      exibirPopupEditarCliente, 
       indicatorAtivo,
       handleSalvarCliente,
-      handleCancelar
+      handleCancelar, 
+      addButtonOptions,
+      saveButtonOptions,
+      cancelButtonOptions
     };
   },   
   components: { 
     DxDataGrid,
+    DxToolbar,
     DxColumn,
     DxButton,
     DxPopup, 
+    DxToolbarItem,
     DxForm,
     DxItem,
     DxLabel,
-    DxRequiredRule,
-    DxCompareRule,
-    DxButtonItem,
-    DxButtonOptions,
-    DxLoadIndicator
+    DxRequiredRule
   }
 };
 
