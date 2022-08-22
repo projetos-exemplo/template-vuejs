@@ -1,62 +1,48 @@
 <template>
   <form class="login-form" @submit.prevent="onSubmit">
-    <dx-form :form-data="formData" :disabled="loading">
-      <dx-item
+    <DxForm :form-data="formData" :disabled="loading">
+      <DxItem
         data-field="email"
         editor-type="dxTextBox"
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Email', mode: 'email' }"
+        :editor-options="{ stylingMode: 'outlined', labelMode: 'floating', placeholder: 'Email', mode: 'email' }"
       >
-        <dx-required-rule message="Email is required" />
-        <dx-email-rule message="Email is invalid" />
-        <dx-label :visible="false" />
-      </dx-item>
-      <dx-item
-        data-field='password'
+        <DxRequiredRule message="Preencha o email." />
+        <DxEmailRule message="O email informado é inválido." />
+        <DxLabel :visible="false" />
+      </DxItem>
+      <DxItem
+        data-field='senha'
         editor-type='dxTextBox'
-        :editor-options="{ stylingMode: 'filled', placeholder: 'Password', mode: 'password' }"
+        :editor-options="{ stylingMode: 'outlined', labelMode: 'floating', placeholder: 'Senha', mode: 'password' }"
       >
-        <dx-required-rule message="Password is required" />
-        <dx-label :visible="false" />
-      </dx-item>
-      <dx-item
-        data-field="rememberMe"
-        editor-type="dxCheckBox"
-        :editor-options="{ text: 'Remember me', elementAttr: { class: 'form-text' } }"
-      >
-        <dx-label :visible="false" />
-      </dx-item>
-      <dx-button-item>
-        <dx-button-options
+        <DxRequiredRule message="Preencha a senha." />
+        <DxLabel :visible="false" />
+      </DxItem>
+      <DxButtonItem>
+        <DxButtonOptions
           width="100%"
           type="default"
           template="signInTemplate"
           :use-submit-behavior="true"
         >
-        </dx-button-options>
-      </dx-button-item>
-      <dx-item>
+        </DxButtonOptions>
+      </DxButtonItem>
+      <DxItem>
         <template #default>
           <div class="link">
-            <router-link to="/reset-password">Forgot password?</router-link>
+            <router-link to="/reset-password">Esqueceu a senha?</router-link>
           </div>
         </template>
-      </dx-item>
-      <dx-button-item>
-        <dx-button-options
-          text="Create an account"
-          width="100%"
-          :on-click="onCreateAccountClick"
-        />
-      </dx-button-item>
+      </DxItem>
       <template #signInTemplate>
         <div>
           <span class="dx-button-text">
-            <dx-load-indicator v-if="loading" width="24px" height="24px" :visible="true" />
-            <span v-if="!loading">Sign In</span>
+            <DxLoadIndicator v-if="loading" width="24px" height="24px" :visible="true" />
+            <span v-if="!loading">Entrar</span>
           </span>
         </div>
       </template>
-    </dx-form>
+    </DxForm>
   </form>
 </template>
 
@@ -72,7 +58,7 @@ import DxForm, {
 } from "devextreme-vue/form";
 import notify from 'devextreme/ui/notify';
 
-import auth from "../auth";
+import auth from "../services/auth";
 
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -83,8 +69,8 @@ export default {
     const router = useRouter();
 
     const formData = reactive({
-      email:"",
-      password:""
+      email: "",
+      senha: ""
     });
     const loading = ref(false);
 
@@ -93,9 +79,9 @@ export default {
     }
 
     async function onSubmit() {
-      const { email, password } = formData;
+      const { email, senha } = formData;
       loading.value = true;
-      const result = await auth.logIn(email, password);
+      const result = await auth.login(email, senha);
       if (!result.isOk) {
         loading.value = false;
         notify(result.message, "error", 2000);

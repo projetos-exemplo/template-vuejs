@@ -36,7 +36,7 @@
               height="100%"
               styling-mode="text"
             >
-              <user-panel :email="email" :menu-items="userMenuItems" menu-mode="context" />
+              <user-panel :username="username" :menu-items="userMenuItems" menu-mode="context" />
             </dx-button>
           </div>
         </template>
@@ -44,7 +44,7 @@
       
       <template #menuUserItem>
         <user-panel
-          :email="email"
+          :username="username"
           :menu-items="userMenuItems"
           menu-mode="list"
         />
@@ -56,8 +56,8 @@
 <script>
 import DxButton from "devextreme-vue/button";
 import DxToolbar, { DxItem } from "devextreme-vue/toolbar";
-import auth from "../auth";
-import { useRouter, useRoute } from 'vue-router';
+import auth from "../services/auth";
+import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 
 import UserPanel from "./user-panel";
@@ -70,40 +70,26 @@ export default {
     logOutFunc: Function
   },
   setup() {
-    const router = useRouter();
-    const route = useRoute();
+    const router = useRouter(); 
 
-    const email = ref("");
-    auth.getUser().then((e) => email.value = e.data.email);
+    const username = ref("");
+    auth.getUser().then((e) => { 
+      username.value = e.data.Username
+    });
     
-    const userMenuItems = [{
-        text: "Profile",
-        icon: "user",
-        onClick: onProfileClick
-      },
+    const userMenuItems = [
       {
-        text: "Logout",
+        text: "Sair",
         icon: "runner",
         onClick: onLogoutClick
     }];
       
     function onLogoutClick() {
-      auth.logOut();
-      router.push({
-        path: "/login-form",
-        query: { redirect: route.path }
-      });
-    }
-
-    function onProfileClick() {
-      router.push({
-        path: "/profile",
-        query: { redirect: route.path }
-      });
-    }
+      auth.logout(router); 
+    } 
 
     return {
-      email,
+      username,
       userMenuItems
     };
   },
